@@ -1,7 +1,7 @@
 # WorkScripts
 This repo contains various important scripts I've created for system administration purposes.
 
-#Linux Scripts#
+Linux Scripts
 
 	checkLabStatus.sh:
 	-----------------
@@ -26,7 +26,7 @@ This repo contains various important scripts I've created for system administrat
 		---------------
 			This script went back and fixed php Error loggin in the previously mentioned lampstacks
 
-#Mac Scripts#
+Mac Scripts
 	
 	addLinuxDirToFavs.sh:
 	--------------------
