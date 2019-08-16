@@ -19,17 +19,17 @@ Linux Scripts
 		I used this script once to grab hostnames and Mac Addresses of machines I was retiring. 
 		It was highly useful in that one situation, but honestly I've never used it again.
 
-	##CSCI366scripts##
+CSCI366scripts
 
-		DWDSetup.sh:
-		------------
-			This script was used to automate the configuration of VMs I was deploying. 
-			Configuring ~56 lampstacks manually isn't something I wished to do.
+	DWDSetup.sh:
+	------------
+		This script was used to automate the configuration of VMs I was deploying. 
+		Configuring ~56 lampstacks manually isn't something I wished to do.
 
-		phpErrorLog.sh:
-		---------------
-			This script went back and fixed php Error loggin in the previously mentioned 
-			lampstacks.
+	phpErrorLog.sh:
+	---------------
+		This script went back and fixed php Error loggin in the previously mentioned 
+		lampstacks.
 
 Mac Scripts
 	
