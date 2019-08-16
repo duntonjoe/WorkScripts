@@ -1,5 +1,5 @@
 # WorkScripts
-This repo contains various important scripts I've created for system administration purposes.
+This repo contains various scripts I've created for system administration purposes.
 
 Linux Scripts
 
