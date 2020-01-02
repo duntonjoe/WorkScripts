@@ -20,6 +20,4 @@ do
     		echo "$host is down"
    	fi
 done
-sleep 1
 tput sgr0
-

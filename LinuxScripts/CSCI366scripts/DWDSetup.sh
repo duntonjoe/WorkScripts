@@ -15,6 +15,9 @@ wget https://www.dotweb.org/dotdeb.gpg
 apt-key add dotdeb.gpg
 apt-get install php7.0 php7.0-common php7.0-mysql
 
+#Hogg would like postgreSQL as well:
+apt-get install postgresql
+
 #finish apache configuration
 cd /etc/apache2/mods-enabled
 ln -s ../mods-available/php7.0.load
