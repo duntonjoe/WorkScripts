@@ -1,10 +1,53 @@
 #Author: 	Joe Dunton
 #Desc:		This script automates configuration of turnkey lampstacks for CSCI366
+#Notes:		This script depends on a couple things:
+# 1) you must have the following prestaged files
+#	/home/students/_USERNAME_/host-manager/context.xml
+#	/home/students/_USERNAME_/manager/context.xml
+#	/home/students/_USERNAME_/conf/context.xml
+#	/home/students/_USERNAME_/conf/tomcat-users.xml
+#		
+#	 +---------------------------------------------------------+
+#	 | the "_USERNAME_" needs to be replaced with the username |
+#	 | of anybody running this script.                         |
+#	 +---------------------------------------------------------+
+#
+#	The prestaged context files should be edited to allow
+#	whatever locality is needed for the tomcat groups. For
+#	our purposes, this locality will be configured to alllow
+#	remote users with:
+#
+#	<Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
+#
+#	tomcat-users.xml should have the following:
+#	  -Any requested roles. These are the minimum required:
+#	    <role rolename="manager-gui"/>
+#	    <role rolename="admin-gui"/>
+#	  -You should include a blank user to be filled in:
+#
+#	    <user username="XYZ" password="ZZYX" fullName="XYZ" roles="manager-gui,admin-gui"/>
+#
+#	  The username and password strings will be swapped
+#	  out with real values within the script. If you 
+#         wish to edit these for some reason, find the
+#	  "Username/Password Configuration" comment.
+#
+# 2) you need curl, it's already installed in our enviornment
+#
+
+
 #!/bin/bash
 
 echo $'\e[1;35m'Running system update...$'\e[0m'
 #Update package mirrors and packages
 apt-get update
+
+read -p "Configure Hostname? (y/n): " choice
+    case $choice in
+        [Yy]* ) apt-get install dbus && read -p "enter hostanme: " host && hostnamectl set-hostname $host && reboot;;
+        [Nn]* ) ;;
+        * ) echo "Please answer yes or no.";;
+    esac
 
 echo $'\e[1;35m'Installing PostgreSQL...$'\e[0m'
 #Hogg would like postgreSQL:
@@ -43,13 +86,41 @@ export JRE_HOME="/usr/lib/jvm/java-8-openjdk-amd64/jre/"
 echo 'export JRE_HOME="/usr/lib/jvm/java-8-openjdk-amd64/jre/"' >> /etc/profile.d/tomcat9.sh
 source /etc/profile.d/tomcat9.sh
 
+echo $'\e[1;33m'Enter Username for remote user: $'\e[0m'
+read remoteUser
+
 echo $'\e[1;35m'Making tomcat mgmt tools available remotely...$'\e[0m'
-rm /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/context.xml && scp jmdunton@boole:/home/students/jmdunton/manager/context.xml /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/
-rm /opt/tomcat/apache-tomcat-9.0.30/webapps/host-manager/META-INF/context.xml && scp jmdunton@boole:/home/students/jmdunton/host-manager/context.xml /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/
+rm /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/context.xml && scp $remoteUser@boole:/home/students/$remoteUser/manager/context.xml /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/
+rm /opt/tomcat/apache-tomcat-9.0.30/webapps/host-manager/META-INF/context.xml && scp $remoteUser@boole:/home/students/$remoteUser/host-manager/context.xml /opt/tomcat/apache-tomcat-9.0.30/webapps/manager/META-INF/
+rm /opt/tomcat/apache-tomcat-9.0.30/conf/context.xml && scp $remoteUser@boole:/home/students/$remoteUser/conf/context.xml /opt/tomcat/apache-tomcat-9.0.30/conf/
 
 echo $'\e[1;35m'Make sure tomcat runs...$'\e[0m'
 bash /opt/tomcat/apache-tomcat-9.0.30/bin/startup.sh && ping localhost -c 5 > /dev/null && bash /opt/tomcat/apache-tomcat-9.0.30/bin/shutdown.sh 
 
+echo $'\e[1;35m'Configuring tomcat user$'\e[0m'
+username=$(echo $HOSTNAME)
+echo $'\e[1;33m'Enter password part 1: $'\e[0m'
+read passString1
+echo $'\e[1;33m'Grabbing password part 2...$'\e[0m'
+echo $'\e[1;33m'Enter password part 3: $'\e[0m'
+read passString2
+password=$(var=$passString1 && var+=$(echo $HOSTNAME) && var+=$passString2 && echo $var)
+rm /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xml
+scp $remoteUser@boole:/home/students/$remoteUser/tomcat-users.xml  /opt/tomcat/apache-tomcat-9.0.30/conf/
+
+
+#Username/Password configuration
+sed -i "s/XYZ/$username/g" /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xml
+sed -i "s/ZZYX/$password/g" /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xml
+echo $'\e[1;33m'$username : $password $'\e[0m'
+
+echo $'\e[1;35m'Allowing Remote MySQL access...'\e[0m'
+sed -i '/bind-address\t\t= 127.0.0.1/c\bind-address\t\t= 0.0.0.0'  /etc/mysql/mariadb.conf.d/50-server.cnf &&
+	/etc/init.d/mysql restart
+
+
 echo $'\e[1;35m'Checking Apache...$'\e[0m'
 systemctl restart apache2
 systemctl status apache2
+
+history -c
