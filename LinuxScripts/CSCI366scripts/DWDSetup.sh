@@ -33,7 +33,6 @@
 #	  "Username/Password Configuration" comment.
 #
 # 2) you need curl, it's already installed in our enviornment
-#
 
 
 #!/bin/bash
@@ -114,7 +113,7 @@ sed -i "s/XYZ/$username/g" /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xm
 sed -i "s/ZZYX/$password/g" /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xml
 echo $'\e[1;33m'$username : $password $'\e[0m'
 
-echo $'\e[1;35m'Allowing Remote MySQL access...'\e[0m'
+echo $'\e[1;35m'Allowing Remote MySQL access...$'\e[0m'
 sed -i '/bind-address\t\t= 127.0.0.1/c\bind-address\t\t= 0.0.0.0'  /etc/mysql/mariadb.conf.d/50-server.cnf &&
 	/etc/init.d/mysql restart
 
