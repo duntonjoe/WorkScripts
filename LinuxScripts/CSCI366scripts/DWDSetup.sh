@@ -98,12 +98,7 @@ bash /opt/tomcat/apache-tomcat-9.0.30/bin/startup.sh && ping localhost -c 5 > /d
 
 echo $'\e[1;35m'Configuring tomcat user$'\e[0m'
 username=$(echo $HOSTNAME)
-echo $'\e[1;33m'Enter password part 1: $'\e[0m'
-read passString1
-echo $'\e[1;33m'Grabbing password part 2...$'\e[0m'
-echo $'\e[1;33m'Enter password part 3: $'\e[0m'
-read passString2
-password=$(var=$passString1 && var+=$(echo $HOSTNAME) && var+=$passString2 && echo $var)
+read -s -p $'\e[1;33m'"Enter password: "$'\e[0m' password
 rm /opt/tomcat/apache-tomcat-9.0.30/conf/tomcat-users.xml
 scp $remoteUser@boole:/home/students/$remoteUser/tomcat-users.xml  /opt/tomcat/apache-tomcat-9.0.30/conf/
 
